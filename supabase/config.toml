@@ -1,0 +1,2 @@
+﻿[functions.custom-login]
+verify_jwt = false

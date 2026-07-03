@@ -114,7 +114,7 @@ export default function AgentStaffPage() {
 
   return (
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>{'下属管理'}</h2>
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
           {'新增下属'}
@@ -127,6 +127,7 @@ export default function AgentStaffPage() {
         dataSource={staff}
         loading={loading}
         pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => '共 ' + t + ' 条' }}
+        scroll={{ x: 'max-content' }}
         size="middle"
         locale={{ emptyText: '暂无下属，点击“新增下属”添加' }}
       />
@@ -138,7 +139,7 @@ export default function AgentStaffPage() {
         onCancel={() => { setModalOpen(false); form.resetFields() }}
         confirmLoading={submitting}
         destroyOnClose
-        width={480}
+        width={{ xs: '90vw', sm: 480 }}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item label={'用户名'} name="username" rules={[{ required: true, message: '请输入用户名' }]}>

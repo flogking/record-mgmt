@@ -155,7 +155,7 @@ export default function FileCenterPage({ user }: Props) {
 
   return (
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>资料中心</h2>
         {user.role === 'director' && (
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setUploadModalOpen(true)}>
@@ -170,6 +170,7 @@ export default function FileCenterPage({ user }: Props) {
         dataSource={files}
         loading={loading}
         pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (t: number) => '共 ' + t + ' 条' }}
+        scroll={{ x: 'max-content' }}
         locale={{ emptyText: <Empty description="暂无文件" /> }}
         size="middle"
       />

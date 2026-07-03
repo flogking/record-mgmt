@@ -41,11 +41,15 @@ export default function AppLayout({ children, onLogout, currentPage, onPageChang
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '0 24px',
+        flexWrap: 'wrap',
+        padding: '8px 16px',
         background: '#fff',
         boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+        gap: 8,
+        height: 'auto',
+        lineHeight: 'unset',
       }}>
-        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{'智能分销系统'}</Text>
+        <Text strong style={{ fontSize: 'clamp(14px, 4vw, 18px)', color: '#1890ff', whiteSpace: 'nowrap' }}>{'智能分销系统'}</Text>
         <Space size="middle">
           {user && (
             <>
@@ -56,7 +60,7 @@ export default function AppLayout({ children, onLogout, currentPage, onPageChang
           <Button icon={<LogoutOutlined />} danger onClick={handleLogout}>{'退出登录'}</Button>
         </Space>
       </Header>
-      <div style={{ padding: '0 24px', background: '#f5f5f5' }}>
+      <div style={{ padding: '0 8px', background: '#f5f5f5', overflowX: 'auto' }}>
         <Tabs
           activeKey={currentPage}
           onChange={onPageChange}

@@ -159,7 +159,7 @@ export default function RecordPage() {
 
   return (
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>{'记录管理'}</h2>
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
           {'新增记录'}
@@ -218,7 +218,7 @@ export default function RecordPage() {
         dataSource={records}
         loading={loading}
         pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => '共 ' + t + ' 条' }}
-        scroll={{ x: 1400 }}
+        scroll={{ x: 'max-content' }}
         size="middle"
       />
 

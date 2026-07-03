@@ -203,6 +203,7 @@ export default function DashboardPage() {
             columns={columns}
             dataSource={teamStats}
             pagination={false}
+            scroll={{ x: 'max-content' }}
             size="middle"
             expandable={{
               expandedRowRender: (record) => (

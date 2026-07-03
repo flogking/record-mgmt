@@ -87,13 +87,13 @@ export default function TeamPage() {
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
       <h2 style={{ margin: '0 0 16px 0' }}>{'\u56e2\u961f\u7ba1\u7406'}</h2>
 
-      <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-        <div style={{ flex: 1, background: '#fff', padding: '16px 24px', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+      <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 200px', minWidth: 200, background: '#fff', padding: '16px 24px', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
           <div style={{ color: '#999', fontSize: 14 }}>{'\u6211\u7684\u8bb0\u5f55'}</div>
           <div style={{ fontSize: 24, fontWeight: 'bold', marginTop: 4 }}>{ownRecords.length} {'\u6761'}</div>
           <div style={{ color: '#1890ff', fontSize: 16, marginTop: 2 }}>{'\u00a5'}{ownTotal.toFixed(2)}</div>
         </div>
-        <div style={{ flex: 1, background: '#fff', padding: '16px 24px', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+        <div style={{ flex: '1 1 200px', minWidth: 200, background: '#fff', padding: '16px 24px', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
           <div style={{ color: '#999', fontSize: 14 }}>{'\u56e2\u961f\u8bb0\u5f55'}</div>
           <div style={{ fontSize: 24, fontWeight: 'bold', marginTop: 4 }}>{subRecords.length} {'\u6761'}</div>
           <div style={{ color: '#52c41a', fontSize: 16, marginTop: 2 }}>{'\u00a5'}{subTotal.toFixed(2)}</div>
@@ -106,7 +106,7 @@ export default function TeamPage() {
         dataSource={records}
         loading={loading}
         pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => '\u5171 ' + t + ' \u6761' }}
-        scroll={{ x: 1400 }}
+        scroll={{ x: 'max-content' }}
         size="middle"
         locale={{ emptyText: <Empty description={'\u6682\u65e0\u56e2\u961f\u8bb0\u5f55'} /> }}
       />

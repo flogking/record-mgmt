@@ -9,6 +9,7 @@ import type { Record } from '../types/record'
 import type { RecordFormData } from '../services/recordService'
 import RecordFormModal from '../components/RecordFormModal'
 import { canEditRow } from '../utils/permission'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authFetchWithTimeout } from '../utils/api'
 
 export default function RecordPage() {
   const [records, setRecords] = useState<Record[]>([])

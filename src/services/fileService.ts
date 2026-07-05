@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { getAccessToken } from './authService'
-import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetch } from '../utils/api'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetchWithTimeout } from '../utils/api'
 
 function headers() { return authHeaders() }
 
@@ -23,7 +23,7 @@ export interface CreateFileData {
 }
 
 export async function fetchFiles(): Promise<FileRecord[]> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/files?select=*&order=created_at.desc', {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/files?select=*&order=created_at.desc', {
     headers: headers(),
   })
   if (!res.ok) {
@@ -34,7 +34,7 @@ export async function fetchFiles(): Promise<FileRecord[]> {
 }
 
 export async function createFileRecord(data: CreateFileData): Promise<void> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/files', {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/files', {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify(data),
@@ -46,7 +46,7 @@ export async function createFileRecord(data: CreateFileData): Promise<void> {
 }
 
 export async function deleteFileRecord(id: string): Promise<void> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/files?id=eq.' + id, {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/files?id=eq.' + id, {
     method: 'DELETE',
     headers: headers(),
   })
@@ -59,7 +59,7 @@ export async function deleteFileRecord(id: string): Promise<void> {
 export async function uploadFileToStorage(file: File, filename: string): Promise<string> {
   const token = getAccessToken()
   const storageUrl = SUPABASE_URL + '/storage/v1/object/sales-files/' + encodeURIComponent(filename)
-  const res = await authFetch(storageUrl, {
+  const res = await authFetchWithTimeout(storageUrl, {
     method: 'POST',
     headers: {
       'apikey': SUPABASE_ANON_KEY,

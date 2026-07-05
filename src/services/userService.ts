@@ -1,5 +1,5 @@
 import type { UserInfo } from './authService'
-import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetch } from '../utils/api'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetchWithTimeout } from '../utils/api'
 
 function headers() { return authHeaders() }
 
@@ -8,7 +8,7 @@ export interface UserInfoWithMeta extends UserInfo {
 }
 
 export async function fetchUsers(): Promise<UserInfoWithMeta[]> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/users?select=id,username,role,parent_id,created_at&order=created_at.desc', {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?select=id,username,role,parent_id,created_at&order=created_at.desc', {
     headers: headers(),
   })
   if (!res.ok) {
@@ -19,7 +19,7 @@ export async function fetchUsers(): Promise<UserInfoWithMeta[]> {
 }
 
 export async function fetchAgent1List(): Promise<UserInfo[]> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/users?select=id,username,role&role=eq.agent_1&order=username.asc', {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?select=id,username,role&role=eq.agent_1&order=username.asc', {
     headers: headers(),
   })
   if (!res.ok) return []
@@ -58,7 +58,7 @@ export async function createUser(form: CreateUserForm): Promise<void> {
   if (form.role === 'agent_2' && form.parent_id) {
     body.parent_id = form.parent_id
   }
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/users', {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users', {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify(body),
@@ -76,7 +76,7 @@ export async function updateUser(id: string, form: UpdateUserForm): Promise<void
   if (form.role !== undefined) body.role = form.role
   if (form.parent_id !== undefined) body.parent_id = form.parent_id
 
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
     method: 'PATCH',
     headers: headers(),
     body: JSON.stringify(body),
@@ -88,7 +88,7 @@ export async function updateUser(id: string, form: UpdateUserForm): Promise<void
 }
 
 export async function deleteUser(id: string): Promise<void> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
     method: 'DELETE',
     headers: headers(),
   })

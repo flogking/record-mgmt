@@ -1,10 +1,10 @@
 import type { Record } from '../types/record'
-import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetch } from '../utils/api'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetchWithTimeout } from '../utils/api'
 
 function headers() { return authHeaders() }
 
 export async function fetchRecords(): Promise<Record[]> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/records?select=*&order=created_at.desc', {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records?select=*&order=created_at.desc', {
     headers: headers(),
   })
   if (!res.ok) {
@@ -28,7 +28,7 @@ export interface RecordFormData {
 export async function createRecord(data: RecordFormData): Promise<Record> {
   const userRaw = localStorage.getItem('user')
   const user = userRaw ? JSON.parse(userRaw) : null
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/records', {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records', {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify({ ...data, user_id: user?.id }),
@@ -41,7 +41,7 @@ export async function createRecord(data: RecordFormData): Promise<Record> {
 }
 
 export async function updateRecord(id: string, data: Partial<RecordFormData>): Promise<void> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
     method: 'PATCH',
     headers: headers(),
     body: JSON.stringify(data),
@@ -53,7 +53,7 @@ export async function updateRecord(id: string, data: Partial<RecordFormData>): P
 }
 
 export async function deleteRecord(id: string): Promise<void> {
-  const res = await authFetch(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
     method: 'DELETE',
     headers: headers(),
   })

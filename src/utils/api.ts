@@ -10,15 +10,31 @@ export function authHeaders(): Record<string, string> {
 }
 
 export async function authFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  // Clone response so body can be re-read after JWT check
   const res = await fetch(url, init)
   if (res.status === 401) {
-    const body = await res.text().catch(() => '')
+    const clone = res.clone()
+    const body = await clone.text().catch(() => '')
     if (body.toLowerCase().includes('jwt') || body.toLowerCase().includes('expired') || body.toLowerCase().includes('token')) {
       localStorage.removeItem('access_token')
       localStorage.removeItem('user')
       if (_onExpired) _onExpired()
-      throw new Error('登录已过期，请重新登录')
+      throw new Error('\u767b\u5f55\u5df2\u8fc7\u671f\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55')
     }
   }
   return res
+}
+
+// Fetch with timeout (default 15s) to avoid infinite hanging
+export async function authFetchWithTimeout(url: string, init: RequestInit = {}, timeoutMs = 15000): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await authFetch(url, { ...init, signal: controller.signal })
+  } catch (err: any) {
+    if (err.name === 'AbortError') throw new Error('\u8bf7\u6c42\u8d85\u65f6\uff0c\u8bf7\u68c0\u67e5\u7f51\u7edc\u540e\u91cd\u8bd5')
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
 }

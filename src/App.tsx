@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage'
 import FileCenterPage from './pages/FileCenterPage'
 import AppLayout from './components/AppLayout'
 import { getUser } from './services/authService'
+import { onJwtExpired } from './utils/api'
 
 export default function App() {
   const [user, setUser] = useState<any>(null)
@@ -18,6 +19,7 @@ export default function App() {
   useEffect(() => {
     const saved = getUser()
     if (saved) setUser(saved)
+    onJwtExpired(() => setUser(null))
   }, [])
 
   const renderPage = () => {

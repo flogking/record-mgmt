@@ -1,24 +1,15 @@
 import type { Record } from '../types/record'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetch } from '../utils/api'
 
-const SUPABASE_URL = 'https://mxywcwjiltmhyiueatfu.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14eXdjd2ppbHRtaHlpdWVhdGZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MDI1MzYsImV4cCI6MjA5ODQ3ODUzNn0.K2J9Aw0jJSGipOgjjGx7CHK8-iQ-SCzS5JSxOMRxpW8'
-
-function headers(): { [key: string]: string } {
-  const token = localStorage.getItem('access_token')
-  return {
-    'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
-    ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
-  }
-}
+function headers() { return authHeaders() }
 
 export async function fetchRecords(): Promise<Record[]> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/records?select=*&order=created_at.desc', {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/records?select=*&order=created_at.desc', {
     headers: headers(),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '获取数据失败')
+    throw new Error((err as any).message || '\u83b7\u53d6\u6570\u636e\u5931\u8d25')
   }
   return res.json()
 }
@@ -37,37 +28,37 @@ export interface RecordFormData {
 export async function createRecord(data: RecordFormData): Promise<Record> {
   const userRaw = localStorage.getItem('user')
   const user = userRaw ? JSON.parse(userRaw) : null
-  const res = await fetch(SUPABASE_URL + '/rest/v1/records', {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/records', {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify({ ...data, user_id: user?.id }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '创建失败')
+    throw new Error((err as any).message || '\u521b\u5efa\u5931\u8d25')
   }
   return res.json()
 }
 
 export async function updateRecord(id: string, data: Partial<RecordFormData>): Promise<void> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
     method: 'PATCH',
     headers: headers(),
     body: JSON.stringify(data),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '更新失败')
+    throw new Error((err as any).message || '\u66f4\u65b0\u5931\u8d25')
   }
 }
 
 export async function deleteRecord(id: string): Promise<void> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
     method: 'DELETE',
     headers: headers(),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '删除失败')
+    throw new Error((err as any).message || '\u5220\u9664\u5931\u8d25')
   }
 }

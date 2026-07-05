@@ -1,17 +1,8 @@
 import { supabase } from '../lib/supabase'
 import { getAccessToken } from './authService'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetch } from '../utils/api'
 
-const SUPABASE_URL = 'https://mxywcwjiltmhyiueatfu.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14eXdjd2ppbHRtaHlpdWVhdGZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MDI1MzYsImV4cCI6MjA5ODQ3ODUzNn0.K2J9Aw0jJSGipOgjjGx7CHK8-iQ-SCzS5JSxOMRxpW8'
-
-function headers(): Record<string, string> {
-  const token = getAccessToken()
-  return {
-    'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
-    ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
-  }
-}
+function headers() { return authHeaders() }
 
 export interface FileRecord {
   id: string
@@ -32,7 +23,7 @@ export interface CreateFileData {
 }
 
 export async function fetchFiles(): Promise<FileRecord[]> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/files?select=*&order=created_at.desc', {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/files?select=*&order=created_at.desc', {
     headers: headers(),
   })
   if (!res.ok) {
@@ -43,7 +34,7 @@ export async function fetchFiles(): Promise<FileRecord[]> {
 }
 
 export async function createFileRecord(data: CreateFileData): Promise<void> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/files', {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/files', {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify(data),
@@ -55,7 +46,7 @@ export async function createFileRecord(data: CreateFileData): Promise<void> {
 }
 
 export async function deleteFileRecord(id: string): Promise<void> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/files?id=eq.' + id, {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/files?id=eq.' + id, {
     method: 'DELETE',
     headers: headers(),
   })
@@ -67,9 +58,8 @@ export async function deleteFileRecord(id: string): Promise<void> {
 
 export async function uploadFileToStorage(file: File, filename: string): Promise<string> {
   const token = getAccessToken()
-  // Use direct fetch to Supabase Storage REST API to ensure auth header is included
   const storageUrl = SUPABASE_URL + '/storage/v1/object/sales-files/' + encodeURIComponent(filename)
-  const res = await fetch(storageUrl, {
+  const res = await authFetch(storageUrl, {
     method: 'POST',
     headers: {
       'apikey': SUPABASE_ANON_KEY,
@@ -85,8 +75,7 @@ export async function uploadFileToStorage(file: File, filename: string): Promise
     throw new Error((err as any).message || (err as any).error || '\u4e0a\u4f20\u6587\u4ef6\u5931\u8d25')
   }
 
-  const result = await res.json()
-  // Public URL format for Supabase Storage
+  await res.json()
   const publicUrl = SUPABASE_URL + '/storage/v1/object/public/sales-files/' + encodeURIComponent(filename)
   return publicUrl
 }

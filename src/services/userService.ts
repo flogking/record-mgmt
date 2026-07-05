@@ -1,34 +1,25 @@
 import type { UserInfo } from './authService'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetch } from '../utils/api'
 
-const SUPABASE_URL = 'https://mxywcwjiltmhyiueatfu.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14eXdjd2ppbHRtaHlpdWVhdGZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MDI1MzYsImV4cCI6MjA5ODQ3ODUzNn0.K2J9Aw0jJSGipOgjjGx7CHK8-iQ-SCzS5JSxOMRxpW8'
-
-function headers(): Record<string, string> {
-  const token = localStorage.getItem('access_token')
-  return {
-    'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
-    ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
-  }
-}
+function headers() { return authHeaders() }
 
 export interface UserInfoWithMeta extends UserInfo {
   created_at: string
 }
 
 export async function fetchUsers(): Promise<UserInfoWithMeta[]> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/users?select=id,username,role,parent_id,created_at&order=created_at.desc', {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/users?select=id,username,role,parent_id,created_at&order=created_at.desc', {
     headers: headers(),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '获取用户列表失败')
+    throw new Error((err as any).message || '\u83b7\u53d6\u7528\u6237\u5217\u8868\u5931\u8d25')
   }
   return res.json()
 }
 
 export async function fetchAgent1List(): Promise<UserInfo[]> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/users?select=id,username,role&role=eq.agent_1&order=username.asc', {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/users?select=id,username,role&role=eq.agent_1&order=username.asc', {
     headers: headers(),
   })
   if (!res.ok) return []
@@ -67,14 +58,14 @@ export async function createUser(form: CreateUserForm): Promise<void> {
   if (form.role === 'agent_2' && form.parent_id) {
     body.parent_id = form.parent_id
   }
-  const res = await fetch(SUPABASE_URL + '/rest/v1/users', {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/users', {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify(body),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '创建用户失败')
+    throw new Error((err as any).message || '\u521b\u5efa\u7528\u6237\u5931\u8d25')
   }
 }
 
@@ -85,24 +76,24 @@ export async function updateUser(id: string, form: UpdateUserForm): Promise<void
   if (form.role !== undefined) body.role = form.role
   if (form.parent_id !== undefined) body.parent_id = form.parent_id
 
-  const res = await fetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
     method: 'PATCH',
     headers: headers(),
     body: JSON.stringify(body),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '更新用户失败')
+    throw new Error((err as any).message || '\u66f4\u65b0\u7528\u6237\u5931\u8d25')
   }
 }
 
 export async function deleteUser(id: string): Promise<void> {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
+  const res = await authFetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
     method: 'DELETE',
     headers: headers(),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '删除用户失败')
+    throw new Error((err as any).message || '\u5220\u9664\u7528\u6237\u5931\u8d25')
   }
 }

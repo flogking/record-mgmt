@@ -4,7 +4,7 @@ import { TeamOutlined, ShoppingCartOutlined, DollarOutlined, CalendarOutlined } 
 import { Column } from '@ant-design/charts'
 import dayjs from 'dayjs'
 
-const SUPABASE_URL = 'https://mxywcwjiltmhyiueatfu.supabase.co'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authFetchWithTimeout } from '../utils/api'
 
 interface UserInfo {
   id: string
@@ -49,13 +49,13 @@ export default function DashboardPage() {
       try {
         const token = localStorage.getItem('access_token')
         const headers: {[key: string]: string} = {
-          'apikey': SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
           ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
         }
 
         const [usersRes, recordsRes] = await Promise.all([
-          fetch(SUPABASE_URL + '/rest/v1/users?select=id,username,role,parent_id', { headers }),
-          fetch(SUPABASE_URL + '/rest/v1/records?select=id,amount,record_date,user_id', { headers }),
+          authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?select=id,username,role,parent_id', { headers }),
+          authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records?select=id,amount,record_date,user_id', { headers }),
         ])
 
         if (!mountedRef.current) return

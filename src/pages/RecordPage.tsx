@@ -126,6 +126,7 @@ export default function RecordPage() {
   const columns: ColumnsType<Record> = [
     { title: '客户姓名', dataIndex: 'customer_name', width: 120 },
     { title: '联系电话', dataIndex: 'phone', width: 130, render: (v: string | null) => v || '-' },
+    { title: '业务', dataIndex: 'business_type', width: 80, render: (v: string | null) => v || '-' },
     { title: '产品', dataIndex: 'product', width: 120 },
     { title: '金额', dataIndex: 'amount', width: 100, render: (v: number) => v ? v.toFixed(2) : '-' },
     { title: '日期', dataIndex: 'record_date', width: 120 },
@@ -176,9 +177,12 @@ export default function RecordPage() {
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>{'记录管理'}</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-          {'新增记录'}
-        </Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+            {'新增记录'}
+          </Button>
+          {!isMobile && <Button type="primary" onClick={handleExport}>{'导出 Excel'}</Button>}
+        </div>
       </div>
 
       <Row gutter={16} style={{ marginBottom: 16 }}>

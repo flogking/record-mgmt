@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx'
 export interface ExportRecord {
   customer_name: string
   phone: string | null
+  business_type: string | null
   product: string
   amount: number
   record_date: string
@@ -18,6 +19,7 @@ export function exportToExcel(records: ExportRecord[], fileName = '收单记录.
   const data = records.map(r => ({
     '客户姓名': r.customer_name,
     '联系电话': r.phone || '',
+    '业务': r.business_type || '',
     '产品': r.product,
     '金额': r.amount,
     '日期': r.record_date,

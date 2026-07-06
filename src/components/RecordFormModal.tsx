@@ -29,6 +29,7 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
           record_time: initialValues.record_time ? dayjs(initialValues.record_time, 'HH:mm') : null,
           tracking_number: initialValues.tracking_number || '',
           phone: initialValues.phone || '',
+          business_type: initialValues.business_type || undefined,
           remark: initialValues.remark || '',
         })
       } else {
@@ -53,6 +54,7 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
         record_time: values.record_time ? values.record_time.format('HH:mm') : null,
         tracking_number: values.tracking_number || null,
         phone: values.phone || null,
+        business_type: values.business_type || null,
         remark: values.remark || null,
       }
       onSubmit(formData)
@@ -114,6 +116,12 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
         </Form.Item>
         <Form.Item label="联系电话" name="phone">
           <Input placeholder="请输入联系电话" />
+        </Form.Item>
+        <Form.Item label="业务" name="business_type">
+          <Select placeholder="请选择业务类型" allowClear>
+            <Select.Option value="办卡">办卡</Select.Option>
+            <Select.Option value="续费">续费</Select.Option>
+          </Select>
         </Form.Item>
         <Form.Item label="产品" name="product" rules={[{ required: true, message: '请输入产品名称' }]}>
           <Input placeholder="请输入产品名称" />

@@ -96,7 +96,7 @@ export default function AgentStaffPage() {
     { title: '用户名', dataIndex: 'username', width: 150 },
     {
       title: '角色', dataIndex: 'role', width: 120,
-      render: (v: string) => <Tag color="green">{'二级代理'}</Tag>,
+      render: (v: string) => <Tag color="green">{'分销商'}</Tag>,
     },
     {
       title: '创建时间', dataIndex: 'created_at', width: 200,

@@ -11,6 +11,6 @@ export function canDeleteRow(currentUser: UserInfo, rowUserId: string): boolean 
 
 export const ROLE_LABEL: Record<string, string> = {
   director: '总监',
-  agent_1: '一级代理',
-  agent_2: '二级代理',
+  agent_1: '经销商',
+  agent_2: '分销商',
 }

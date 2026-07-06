@@ -196,13 +196,13 @@ export default function UserManagePage() {
           </Form.Item>
           <Form.Item label={'角色'} name="role" rules={[{ required: true, message: '请选择角色' }]}>
             <Select placeholder={'请选择角色'}>
-              <Select.Option value="agent_1">{'一级代理'}</Select.Option>
-              <Select.Option value="agent_2">{'二级代理'}</Select.Option>
+              <Select.Option value="agent_1">{'经销商'}</Select.Option>
+              <Select.Option value="agent_2">{'分销商'}</Select.Option>
             </Select>
           </Form.Item>
           {selectedRole === 'agent_2' && (
-            <Form.Item label={'上级一级代理'} name="parent_id" rules={[{ required: true, message: '请选择上级代理' }]}>
-              <Select placeholder={'请选择上级一级代理'}>
+            <Form.Item label={'上级经销商'} name="parent_id" rules={[{ required: true, message: '请选择上级代理' }]}>
+              <Select placeholder={'请选择上级经销商'}>
                 {agent1List.map(a => (
                   <Select.Option key={a.id} value={a.id}>{a.username}</Select.Option>
                 ))}

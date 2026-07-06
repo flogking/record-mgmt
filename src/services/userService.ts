@@ -97,6 +97,26 @@ export async function updateUser(id: string, form: UpdateUserForm): Promise<void
 }
 
 export async function deleteUser(id: string): Promise<void> {
+  // First, fetch the user to get their parent_id
+  const userRes = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?id=eq.' + id + '&select=id,parent_id', {
+    headers: headers(),
+  })
+  if (!userRes.ok) {
+    const err = await userRes.json().catch(() => ({}))
+    throw new Error((err as any).message || '\u83b7\u53d6\u7528\u6237\u4fe1\u606f\u5931\u8d25')
+  }
+  const users = await userRes.json()
+  const user = users[0]
+  const newParentId = user?.parent_id || null
+
+  // Reassign children to the deleted user's parent
+  await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?parent_id=eq.' + id, {
+    method: 'PATCH',
+    headers: headers(),
+    body: JSON.stringify({ parent_id: newParentId }),
+  })
+
+  // Now delete the user
   const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?id=eq.' + id, {
     method: 'DELETE',
     headers: headers(),

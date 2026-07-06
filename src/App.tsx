@@ -8,6 +8,7 @@ import TeamPage from './pages/TeamPage'
 import AgentStaffPage from './pages/AgentStaffPage'
 import DashboardPage from './pages/DashboardPage'
 import FileCenterPage from './pages/FileCenterPage'
+import ClientPage from './pages/ClientPage'
 import AppLayout from './components/AppLayout'
 import { getUser } from './services/authService'
 import { onJwtExpired } from './utils/api'
@@ -18,15 +19,19 @@ export default function App() {
 
   useEffect(() => {
     const saved = getUser()
-    if (saved) setUser(saved)
+    if (saved) {
+      setUser(saved)
+      if (saved.role === 'client') setCurrentPage('client_orders')
+    }
     onJwtExpired(() => setUser(null))
   }, [])
 
   const renderPage = () => {
+    if (user?.role === 'client') return <ClientPage />
     if (currentPage === 'dashboard' && user?.role === 'director') return <DashboardPage />
     if (currentPage === 'users' && user?.role === 'director') return <UserManagePage />
-    if (currentPage === 'team' && user?.role === 'agent_1') return <TeamPage />
-    if (currentPage === 'staff' && user?.role === 'agent_1') return <AgentStaffPage />
+    if (currentPage === 'team' && (user?.role === 'agent_1' || user?.role === 'agent_2')) return <TeamPage />
+    if (currentPage === 'staff' && (user?.role === 'agent_1' || user?.role === 'agent_2')) return <AgentStaffPage />
     if (currentPage === 'files') return <FileCenterPage user={user} />
     return <RecordPage />
   }

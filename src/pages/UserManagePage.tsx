@@ -3,13 +3,14 @@ import { Table, Button, Space, Popconfirm, Tag, message, Modal, Form, Input, Sel
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { getUser } from '../services/authService'
-import { fetchUsers, fetchAgent1List, createUser, updateUser, deleteUser } from '../services/userService'
+import { fetchUsers, fetchAgent1List, fetchParentCandidates, createUser, updateUser, deleteUser } from '../services/userService'
 import type { UserInfoWithMeta, CreateUserForm, UpdateUserForm } from '../services/userService'
 import { ROLE_LABEL } from '../utils/permission'
 
 export default function UserManagePage() {
   const [users, setUsers] = useState<UserInfoWithMeta[]>([])
   const [agent1List, setAgent1List] = useState<{id: string, username: string}[]>([])
+  const [parentCandidates, setParentCandidates] = useState<{id: string, username: string, role: string}[]>([])
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<UserInfoWithMeta | undefined>(undefined)
@@ -62,7 +63,7 @@ export default function UserManagePage() {
         const formData: UpdateUserForm = {
           username: values.username,
           role: values.role,
-          parent_id: values.role === 'agent_2' ? (values.parent_id || null) : null,
+          parent_id: (values.role === 'agent_2' || values.role === 'client') ? (values.parent_id || null) : null,
         }
         if (values.password) formData.password = values.password
         await updateUser(editingUser.id, formData)
@@ -72,7 +73,7 @@ export default function UserManagePage() {
           username: values.username,
           password: values.password,
           role: values.role,
-          parent_id: values.role === 'agent_2' ? values.parent_id : undefined,
+          parent_id: (values.role === 'agent_2' || values.role === 'client') ? values.parent_id : undefined,
         }
         await createUser(formData)
         message.success('创建成功')
@@ -111,7 +112,7 @@ export default function UserManagePage() {
       dataIndex: 'role',
       width: 120,
       render: (v: string) => (
-        <Tag color={v === 'director' ? 'red' : v === 'agent_1' ? 'blue' : 'green'}>
+        <Tag color={v === 'director' ? 'red' : v === 'agent_1' ? 'blue' : v === 'client' ? 'orange' : 'green'}>
           {ROLE_LABEL[v] || v}
         </Tag>
       ),

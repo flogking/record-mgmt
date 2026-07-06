@@ -29,7 +29,7 @@ export async function fetchAgent1List(): Promise<UserInfo[]> {
 export interface CreateUserForm {
   username: string
   password: string
-  role: 'agent_1' | 'agent_2'
+  role: 'agent_1' | 'agent_2' | 'client'
   parent_id?: string
 }
 
@@ -48,6 +48,15 @@ async function sha256(message: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
+
+export async function fetchParentCandidates(): Promise<UserInfo[]> {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users?select=id,username,role&role=in.(agent_1,agent_2)&order=username.asc', {
+    headers: headers(),
+  })
+  if (!res.ok) return []
+  return res.json()
+}
+
 export async function createUser(form: CreateUserForm): Promise<void> {
   const password_hash = await sha256(form.password)
   const body: Record<string, any> = {
@@ -55,7 +64,7 @@ export async function createUser(form: CreateUserForm): Promise<void> {
     password_hash: password_hash,
     role: form.role,
   }
-  if (form.role === 'agent_2' && form.parent_id) {
+  if (form.parent_id) {
     body.parent_id = form.parent_id
   }
   const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/users', {

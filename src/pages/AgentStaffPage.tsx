@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import { Table, Button, Space, Tag, message, Modal, Form, Input } from 'antd'
+import { Table, Button, Space, Tag, message, Modal, Form, Input, Select } from 'antd'
 import { PlusOutlined, EditOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { getUser } from '../services/authService'
 import { createUser, updateUser } from '../services/userService'
 import type { UserInfoWithMeta } from '../services/userService'
+import { ROLE_LABEL } from '../utils/permission'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, authFetchWithTimeout } from '../utils/api'
 
-const SUPABASE_URL = 'https://mxywcwjiltmhyiueatfu.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14eXdjd2ppbHRtaHlpdWVhdGZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MDI1MzYsImV4cCI6MjA5ODQ3ODUzNn0.K2J9Aw0jJSGipOgjjGx7CHK8-iQ-SCzS5JSxOMRxpW8'
 
 export default function AgentStaffPage() {
   const [staff, setStaff] = useState<UserInfoWithMeta[]>([])
@@ -96,7 +96,7 @@ export default function AgentStaffPage() {
     { title: '用户名', dataIndex: 'username', width: 150 },
     {
       title: '角色', dataIndex: 'role', width: 120,
-      render: (v: string) => <Tag color="green">{'分销商'}</Tag>,
+      render: (v: string) => <Tag color={v === 'client' ? 'orange' : 'green'}>{ROLE_LABEL[v] || v}</Tag>,
     },
     {
       title: '创建时间', dataIndex: 'created_at', width: 200,

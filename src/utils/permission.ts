@@ -1,6 +1,7 @@
 import type { UserInfo } from '../services/authService'
 
 export function canEditRow(currentUser: UserInfo, rowUserId: string): boolean {
+  if (currentUser.role === 'client') return false
   if (currentUser.role === 'director') return true
   return currentUser.id === rowUserId
 }
@@ -13,4 +14,5 @@ export const ROLE_LABEL: Record<string, string> = {
   director: '总监',
   agent_1: '经销商',
   agent_2: '分销商',
+  client: '客户',
 }

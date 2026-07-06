@@ -124,6 +124,7 @@ export default function RecordPage() {
 
   const columns: ColumnsType<Record> = [
     { title: '客户姓名', dataIndex: 'customer_name', width: 120 },
+    { title: '联系电话', dataIndex: 'phone', width: 130, render: (v: string | null) => v || '-' },
     { title: '产品', dataIndex: 'product', width: 120 },
     { title: '金额', dataIndex: 'amount', width: 100, render: (v: number) => v ? v.toFixed(2) : '-' },
     { title: '日期', dataIndex: 'record_date', width: 120 },

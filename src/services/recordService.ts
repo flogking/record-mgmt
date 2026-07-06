@@ -22,6 +22,7 @@ export interface RecordFormData {
   shipping_address: string
   record_time: string
   tracking_number: string | null
+  phone: string | null
   remark: string | null
 }
 

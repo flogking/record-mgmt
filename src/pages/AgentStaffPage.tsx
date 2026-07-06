@@ -8,7 +8,6 @@ import type { UserInfoWithMeta } from '../services/userService'
 import { ROLE_LABEL } from '../utils/permission'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, authFetchWithTimeout } from '../utils/api'
 
-
 export default function AgentStaffPage() {
   const [staff, setStaff] = useState<UserInfoWithMeta[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,10 +23,11 @@ export default function AgentStaffPage() {
     setLoading(true)
     try {
       const token = localStorage.getItem('access_token')
-      const res = await fetch(
+      const res = await authFetchWithTimeout(
         SUPABASE_URL + '/rest/v1/users?select=id,username,role,parent_id,created_at&parent_id=eq.' + currentUser.id + '&order=created_at.desc',
         {
           headers: {
+            'Content-Type': 'application/json',
             'apikey': SUPABASE_ANON_KEY,
             ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
           },
@@ -52,6 +52,7 @@ export default function AgentStaffPage() {
   const openCreate = () => {
     setEditingUser(undefined)
     form.resetFields()
+    form.setFieldsValue({ role: currentUser?.role === 'agent_2' ? 'client' : 'agent_2' })
     setModalOpen(true)
   }
 
@@ -65,7 +66,6 @@ export default function AgentStaffPage() {
     try {
       const values = await form.validateFields()
       setSubmitting(true)
-
       if (editingUser) {
         await updateUser(editingUser.id, {
           username: values.username,
@@ -76,12 +76,11 @@ export default function AgentStaffPage() {
         await createUser({
           username: values.username,
           password: values.password,
-          role: 'agent_2',
+          role: values.role || (currentUser?.role === 'agent_2' ? 'client' : 'agent_2'),
           parent_id: currentUser?.id,
         })
         message.success('创建成功')
       }
-
       setModalOpen(false)
       form.resetFields()
       loadStaff()
@@ -92,66 +91,36 @@ export default function AgentStaffPage() {
     }
   }
 
+  const selectedRole = Form.useWatch('role', form)
+
   const columns: ColumnsType<UserInfoWithMeta> = [
     { title: '用户名', dataIndex: 'username', width: 150 },
-    {
-      title: '角色', dataIndex: 'role', width: 120,
-      render: (v: string) => <Tag color={v === 'client' ? 'orange' : 'green'}>{ROLE_LABEL[v] || v}</Tag>,
-    },
-    {
-      title: '创建时间', dataIndex: 'created_at', width: 200,
-      render: (v: string) => v ? new Date(v).toLocaleString('zh-CN') : '-',
-    },
-    {
-      title: '操作', key: 'action', width: 100,
-      render: (_: any, record: UserInfoWithMeta) => (
-        <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openEdit(record)}>
-          {'编辑'}
-        </Button>
-      ),
-    },
+    { title: '角色', dataIndex: 'role', width: 120, render: (v: string) => <Tag color={v === 'client' ? 'orange' : 'green'}>{ROLE_LABEL[v] || v}</Tag> },
+    { title: '创建时间', dataIndex: 'created_at', width: 200, render: (v: string) => v ? new Date(v).toLocaleString('zh-CN') : '-' },
+    { title: '操作', key: 'action', width: 100, render: (_: any, record: UserInfoWithMeta) => (
+      <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openEdit(record)}>{'编辑'}</Button>
+    )},
   ]
 
   return (
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>{'下属管理'}</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-          {'新增下属'}
-        </Button>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>{'新增下属'}</Button>
       </div>
-
-      <Table
-        rowKey="id"
-        columns={columns}
-        dataSource={staff}
-        loading={loading}
-        pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => '共 ' + t + ' 条' }}
-        scroll={{ x: 'max-content' }}
-        size="middle"
-        locale={{ emptyText: '暂无下属，点击“新增下属”添加' }}
-      />
-
-      <Modal
-        title={editingUser ? '编辑下属' : '新增下属'}
-        open={modalOpen}
-        onOk={handleSubmit}
-        onCancel={() => { setModalOpen(false); form.resetFields() }}
-        confirmLoading={submitting}
-        destroyOnClose
-        width={{ xs: '90vw', sm: 480 }}
-      >
+      <Table rowKey="id" columns={columns} dataSource={staff} loading={loading} pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => '共 ' + t + ' 条' }} scroll={{ x: 'max-content' }} size="middle" locale={{ emptyText: '暂无下属，点击"新增下属"添加' }} />
+      <Modal title={editingUser ? '编辑下属' : '新增下属'} open={modalOpen} onOk={handleSubmit} onCancel={() => { setModalOpen(false); form.resetFields() }} confirmLoading={submitting} destroyOnClose width={{ xs: '90vw', sm: 480 }}>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item label={'用户名'} name="username" rules={[{ required: true, message: '请输入用户名' }]}>
-            <Input placeholder={'请输入用户名'} />
-          </Form.Item>
-          <Form.Item
-            label={'密码'}
-            name="password"
-            rules={editingUser ? [] : [{ required: true, message: '请输入密码' }]}
-          >
-            <Input.Password placeholder={editingUser ? '留空则不修改密码' : '请输入密码'} />
-          </Form.Item>
+          {currentUser?.role === 'agent_1' && (
+            <Form.Item label={'角色'} name="role" rules={[{ required: true, message: '请选择角色' }]}>
+              <Select placeholder={'请选择角色'}>
+                <Select.Option value="agent_2">{'分销商'}</Select.Option>
+                <Select.Option value="client">{'客户'}</Select.Option>
+              </Select>
+            </Form.Item>
+          )}
+          <Form.Item label={'用户名'} name="username" rules={[{ required: true, message: '请输入用户名' }]}><Input placeholder={'请输入用户名'} /></Form.Item>
+          <Form.Item label={'密码'} name="password" rules={editingUser ? [] : [{ required: true, message: '请输入密码' }]}><Input.Password placeholder={editingUser ? '留空则不修改密码' : '请输入密码'} /></Form.Item>
         </Form>
       </Modal>
     </div>

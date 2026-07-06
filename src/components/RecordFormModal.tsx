@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Modal, Form, Input, DatePicker, TimePicker, InputNumber, Button, Divider, message } from 'antd'
+import { Modal, Form, Input, DatePicker, TimePicker, InputNumber, Button, Divider, Select, message } from 'antd'
 import dayjs from 'dayjs'
 import type { Record } from '../types/record'
 import type { RecordFormData } from '../services/recordService'

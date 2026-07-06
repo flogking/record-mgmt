@@ -159,6 +159,18 @@ export default function RecordPage() {
       : []),
   ]
 
+  
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+  const handleExport = () => {
+    if (records.length === 0) {
+      message.warning('暂无数据可导出')
+      return
+    }
+    exportToExcel(records)
+    message.success('导出成功')
+  }
+
   return (
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>

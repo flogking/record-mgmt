@@ -3,6 +3,7 @@ import { Table, Button, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { fetchRecords, createRecord, type RecordFormData } from '../services/recordService'
+import { exportToExcel } from '../utils/exportExcel'
 import type { Record } from '../types/record'
 import RecordFormModal from '../components/RecordFormModal'
 
@@ -57,11 +58,23 @@ export default function ClientPage() {
     { title: '创建时间', dataIndex: 'created_at', width: 180, render: (v: string) => v ? dayjs(v).format('YYYY-MM-DD HH:mm:ss') : '-' },
   ]
 
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+  const handleExport = () => {
+    if (records.length === 0) {
+      message.warning('暂无数据可导出')
+      return
+    }
+    exportToExcel(records)
+    message.success('导出成功')
+  }
+
   return (
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>{'收单中心'}</h2>
         <Button type="primary" onClick={() => setModalOpen(true)}>{'新增记录'}</Button>
+        {!isMobile && <Button type="primary" onClick={handleExport}>{'导出 Excel'}</Button>}
       </div>
       <Table
         rowKey="id"

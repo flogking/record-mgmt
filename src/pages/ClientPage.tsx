@@ -61,12 +61,12 @@ export default function ClientPage() {
 
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (records.length === 0) {
       message.warning('暂无数据可导出')
       return
     }
-    exportToExcel(records)
+    await exportToExcel(records)
     message.success('导出成功')
   }
 

@@ -3,8 +3,8 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetchWithTimeout } fr
 
 function headers() { return authHeaders() }
 
-export async function fetchRecords(): Promise<Record[]> {
-  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records?select=*&order=created_at.desc', {
+export async function fetchRecords(limit = 100): Promise<Record[]> {
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records?select=*&order=created_at.desc&limit=' + limit, {
     headers: headers(),
   })
   if (!res.ok) {

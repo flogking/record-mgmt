@@ -1,5 +1,3 @@
-import * as XLSX from 'xlsx'
-
 export interface ExportRecord {
   customer_name: string
   phone: string | null
@@ -14,8 +12,9 @@ export interface ExportRecord {
   creator_name?: string
 }
 
-export function exportToExcel(records: ExportRecord[], fileName = '收单记录.xlsx') {
+export async function exportToExcel(records: ExportRecord[], fileName = '收单记录.xlsx') {
   if (!records || records.length === 0) return
+  const XLSX = await import('xlsx')
 
   const data = records.map(r => ({
     '客户姓名': r.customer_name,

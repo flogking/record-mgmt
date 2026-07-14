@@ -21,7 +21,7 @@ export function exportToExcel(records: ExportRecord[], fileName = '收单记录.
     '客户姓名': r.customer_name,
     '联系电话': r.phone || '',
     '业务': r.business_type || '',
-    '产品': r.product,
+    '产品号码': r.product,
     '金额': r.amount,
     '日期': r.record_date,
     '快递地址': r.shipping_address,

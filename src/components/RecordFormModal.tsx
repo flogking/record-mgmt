@@ -123,7 +123,7 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
             <Select.Option value="续费">续费</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item label="产品" name="product" rules={[{ required: true, message: '请输入产品名称' }]}>
+        <Form.Item label="产品号码" name="product" rules={[{ required: true, message: '请输入产品号码' }]}>
           <Input placeholder="请输入产品名称" />
         </Form.Item>
         <Form.Item label="金额" name="amount" rules={[{ required: true, message: '请输入金额' }]}>
@@ -135,7 +135,7 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
         <Form.Item label="时间" name="record_time">
           <TimePicker style={{ width: '100%' }} format="HH:mm" placeholder="请选择时间" />
         </Form.Item>
-        <Form.Item label="快递地址" name="shipping_address" rules={[{ required: true, message: '请输入快递地址' }]}>
+        <Form.Item label="快递地址" name="shipping_address">
           <Input.TextArea rows={3} placeholder="请输入快递地址" />
         </Form.Item>
         <Form.Item label="快递单号" name="tracking_number">

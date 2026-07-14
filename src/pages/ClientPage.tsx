@@ -49,7 +49,7 @@ export default function ClientPage() {
   const columns: ColumnsType<Record> = [
     { title: '客户姓名', dataIndex: 'customer_name', width: 120 },
     { title: '业务', dataIndex: 'business_type', width: 80, render: (v: string | null) => v || '-' },
-    { title: '产品', dataIndex: 'product', width: 120 },
+    { title: '产品号码', dataIndex: 'product', width: 120 },
     { title: '金额', dataIndex: 'amount', width: 100, render: (v: number) => v ? v.toFixed(2) : '-' },
     { title: '日期', dataIndex: 'record_date', width: 120 },
     { title: '快递地址', dataIndex: 'shipping_address', width: 180, ellipsis: true },

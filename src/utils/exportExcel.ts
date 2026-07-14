@@ -11,6 +11,7 @@ export interface ExportRecord {
   tracking_number: string | null
   remark: string | null
   created_at: string
+  creator_name?: string
 }
 
 export function exportToExcel(records: ExportRecord[], fileName = '收单记录.xlsx') {
@@ -26,6 +27,7 @@ export function exportToExcel(records: ExportRecord[], fileName = '收单记录.
     '快递地址': r.shipping_address,
     '快递单号': r.tracking_number || '',
     '备注': r.remark || '',
+    '创建人': r.creator_name || '',
     '创建时间': r.created_at,
   }))
 

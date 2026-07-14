@@ -10,6 +10,7 @@ import type { RecordFormData } from '../services/recordService'
 import RecordFormModal from '../components/RecordFormModal'
 import { canEditRow } from '../utils/permission'
 import { exportToExcel } from '../utils/exportExcel'
+import { fetchUsers } from '../services/userService'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, authFetchWithTimeout } from '../utils/api'
 
 export default function RecordPage() {
@@ -164,13 +165,24 @@ export default function RecordPage() {
   
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (records.length === 0) {
-      message.warning('暂无数据可导出')
+      message.warning('\u6682\u65e0\u6570\u636e\u53ef\u5bfc\u51fa')
       return
     }
-    exportToExcel(records)
-    message.success('导出成功')
+    try {
+      const users = await fetchUsers()
+      const userMap: Record<string, string> = {}
+      users.forEach((u: any) => { userMap[u.id] = u.username })
+      const recordsWithCreator = records.map((r: any) => ({
+        ...r,
+        creator_name: userMap[r.user_id] || r.user_id,
+      }))
+      exportToExcel(recordsWithCreator)
+      message.success('\u5bfc\u51fa\u6210\u529f')
+    } catch (err: any) {
+      message.error(err.message)
+    }
   }
 
   return (

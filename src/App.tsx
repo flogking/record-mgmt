@@ -9,6 +9,7 @@ import AgentStaffPage from './pages/AgentStaffPage'
 import DashboardPage from './pages/DashboardPage'
 import FileCenterPage from './pages/FileCenterPage'
 import ClientPage from './pages/ClientPage'
+import RankingsPage from './pages/RankingsPage'
 import AppLayout from './components/AppLayout'
 import { getUser } from './services/authService'
 import { onJwtExpired } from './utils/api'
@@ -32,6 +33,7 @@ export default function App() {
     if (currentPage === 'users' && user?.role === 'director') return <UserManagePage />
     if (currentPage === 'team' && (user?.role === 'agent_1' || user?.role === 'agent_2')) return <TeamPage />
     if (currentPage === 'staff' && (user?.role === 'agent_1' || user?.role === 'agent_2')) return <AgentStaffPage />
+    if (currentPage === 'rankings') return <RankingsPage />
     if (currentPage === 'files') return <FileCenterPage user={user} />
     return <RecordPage />
   }

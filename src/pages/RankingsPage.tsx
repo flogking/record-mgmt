@@ -46,8 +46,8 @@ function getTodayRange() {
 
 function getLastWeekRange() {
   return {
-    start: dayjs().subtract(1, 'week').startOf('week').add(1, 'day').startOf('day').format('YYYY-MM-DDTHH:mm:ssZ'),
-    end: dayjs().subtract(1, 'week').endOf('week').add(1, 'day').endOf('day').format('YYYY-MM-DDTHH:mm:ssZ'),
+    start: dayjs().subtract(7, 'day').startOf('day').format('YYYY-MM-DDTHH:mm:ssZ'),
+    end: dayjs().subtract(1, 'day').endOf('day').format('YYYY-MM-DDTHH:mm:ssZ'),
   }
 }
 

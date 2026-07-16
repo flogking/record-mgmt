@@ -84,7 +84,6 @@ export default function AppLayout({ children, onLogout, currentPage, onPageChang
         { key: 'rankings', label: '排行榜' },
       ]
     : [
-        { key: 'rankings', label: '排行榜' },
         { key: 'records', label: '记录管理' },
         { key: 'files', label: '资料中心' },
         ...(userRole === 'director' ? [
@@ -95,6 +94,7 @@ export default function AppLayout({ children, onLogout, currentPage, onPageChang
           { key: 'team', label: '团队管理' },
           { key: 'staff', label: '下属管理' },
         ] : []),
+        { key: 'rankings', label: '排行榜' },
       ]
 
   return (

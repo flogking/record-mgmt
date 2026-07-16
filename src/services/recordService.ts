@@ -32,12 +32,12 @@ export async function createRecord(data: RecordFormData): Promise<Record> {
   const user = userRaw ? JSON.parse(userRaw) : null
   const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records', {
     method: 'POST',
-    headers: headers(),
+    headers: { ...headers(), 'Prefer': 'return=representation' },
     body: JSON.stringify({ ...data, user_id: user?.id }),
   })
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '\u521b\u5efa\u5931\u8d25')
+    const err = await res.text().catch(() => '')
+    throw new Error(err || '\u521b\u5efa\u5931\u8d25')
   }
   return res.json()
 }
@@ -45,12 +45,12 @@ export async function createRecord(data: RecordFormData): Promise<Record> {
 export async function updateRecord(id: string, data: Partial<RecordFormData>): Promise<void> {
   const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/records?id=eq.' + id, {
     method: 'PATCH',
-    headers: headers(),
+    headers: { ...headers(), 'Prefer': 'return=representation' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error((err as any).message || '\u66f4\u65b0\u5931\u8d25')
+    const err = await res.text().catch(() => '')
+    throw new Error(err || '\u66f4\u65b0\u5931\u8d25')
   }
 }
 

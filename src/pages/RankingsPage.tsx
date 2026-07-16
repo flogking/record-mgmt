@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Table, Tabs, Empty, Spin, Tag, Typography } from 'antd'
-import { TrophyOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
+import { Tabs, Empty, Spin, Tag, Typography, Button, Modal } from 'antd'
+import { TrophyOutlined, EyeOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { getUser } from '../services/authService'
 import { SUPABASE_URL, authHeaders, authFetchWithTimeout } from '../utils/api'
+import { getRankStyle, getRandomQuote } from '../utils/rankingConstants'
 
 const { Text } = Typography
 
@@ -16,8 +16,6 @@ interface RankingItem {
   totalAmount: number
   orderCount: number
 }
-
-const rankColors = ['#fff8e1', '#f5f5f5', '#fff3e0']
 
 function headers() { return authHeaders() }
 
@@ -53,69 +51,163 @@ function getLastWeekRange() {
   }
 }
 
-function RankingTable({ data, loading }: { data: RankingItem[]; loading: boolean }) {
+function RankCard({ item, quote }: { item: RankingItem; quote: string }) {
+  const currentUser = getUser()
+  const isMe = currentUser && item.user_id === currentUser.id
+  const style = getRankStyle(item.rank)
+
+  return (
+    <div
+      style={{
+        background: style.bg,
+        color: style.textColor,
+        border: style.border || 'none',
+        borderRadius: 12,
+        padding: '16px 20px',
+        marginBottom: 12,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+      className={item.rank <= 3 ? 'glow-card' : ''}
+    >
+      {/* 排名徽章 */}
+      <div
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: '50%',
+          background: item.rank <= 3 ? 'rgba(255,255,255,0.9)' : '#f0f0f0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 18,
+          fontWeight: 700,
+          flexShrink: 0,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        }}
+      >
+        {item.rank}
+      </div>
+
+      {/* 左侧信息 */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 2 }}>
+          {style.emoji} {style.title}
+        </div>
+        <div style={{ fontSize: 16, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+          {item.username}
+          {isMe && <Tag color="gold" size="small">我</Tag>}
+        </div>
+        <div style={{ fontSize: 13, opacity: 0.7, marginTop: 2 }}>
+          {item.orderCount} 单战绩
+        </div>
+      </div>
+
+      {/* 右侧金额 + 文案 */}
+      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+        <div style={{ fontSize: 22, fontWeight: 700 }}>
+          ¥{item.totalAmount.toFixed(2)}
+        </div>
+        <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4, maxWidth: 160 }}>
+          {quote}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RankingsList({ data, loading }: { data: RankingItem[]; loading: boolean }) {
   const currentUser = getUser()
   const isInTop5 = currentUser && data.some(d => d.user_id === currentUser.id)
   const isNotInTop5 = currentUser?.role === 'agent_2' && !isInTop5 && data.length > 0
+  const [gapModalOpen, setGapModalOpen] = useState(false)
 
-  const columns: ColumnsType<RankingItem> = [
-    {
-      title: '排名',
-      dataIndex: 'rank',
-      width: 70,
-      render: (v: number) => v <= 3
-        ? <span style={{ fontWeight: 700, color: v === 1 ? '#d4a017' : v === 2 ? '#888' : '#a0522d', fontSize: 16 }}>{v}</span>
-        : v,
-    },
-    {
-      title: '用户名',
-      dataIndex: 'username',
-      render: (v: string, record: RankingItem) => {
-        const isMe = currentUser && record.user_id === currentUser.id
-        return <>{v} {isMe && <Tag color='gold' style={{ marginLeft: 4 }}>我</Tag>}</>
-      },
-    },
-    {
-      title: '总金额',
-      dataIndex: 'totalAmount',
-      width: 120,
-      render: (v: number) => <span style={{ fontWeight: 600 }}>{v.toFixed(2)}</span>,
-    },
-    {
-      title: '订单数',
-      dataIndex: 'orderCount',
-      width: 80,
-    },
-  ]
+  // 为每个卡片生成随机文案（固定本次渲染）
+  const quotes = data.map(() => getRandomQuote())
+
+  // 计算差距
+  const fifthItem = data[4]
+  const myItem = currentUser ? data.find(d => d.user_id === currentUser.id) : undefined
+  const amountGap = fifthItem && myItem ? fifthItem.totalAmount - myItem.totalAmount : 0
+  const orderGap = fifthItem && myItem ? fifthItem.orderCount - myItem.orderCount : 0
 
   return (
     <div>
       <Spin spinning={loading}>
-        {data.length === 0
-          ? <Empty description='暂无数据' style={{ marginTop: 60 }} />
-          : <Table
-              columns={columns}
-              dataSource={data}
-              pagination={false}
-              size='middle'
-              rowClassName={(record) => {
-                const r = record.rank
-                if (r <= 3) return 'rank-row-' + r
-                return ''
-              }}
-              style={{ marginBottom: 8 }}
-            />
-        }
+        {data.length === 0 ? (
+          <Empty description="暂无数据" style={{ marginTop: 60 }} />
+        ) : (
+          <>
+            {data.map((item, idx) => (
+              <RankCard key={item.key} item={item} quote={quotes[idx]} />
+            ))}
+          </>
+        )}
       </Spin>
-      {data.length > 0 && (
-        <Text type='secondary' style={{ display: 'block', textAlign: 'center', marginTop: 8 }}>仅展示前 5 名</Text>
+
+      {isNotInTop5 && fifthItem && (
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 12,
+            padding: '16px 20px',
+            marginTop: 16,
+            textAlign: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          }}
+        >
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+            😤 你距离第 5 名还差 ¥{amountGap.toFixed(2)}
+          </div>
+          <div style={{ fontSize: 14, color: '#666', marginBottom: 12 }}>
+            💪 再努力一把，明天销管榜必有你一席之地！
+          </div>
+          <Button type="primary" icon={<EyeOutlined />} onClick={() => setGapModalOpen(true)}>
+            查看差距
+          </Button>
+        </div>
       )}
-      {isNotInTop5 && (
-        <Text type='warning' style={{ display: 'block', textAlign: 'center', marginTop: 4 }}>
-          您当前未进入前 5 名，再接再厉！
-        </Text>
-      )}
-      <style>{`.rank-row-1 td { background: #fff8e1 !important; } .rank-row-2 td { background: #f5f5f5 !important; } .rank-row-3 td { background: #fff3e0 !important; }`}</style>
+
+      {/* 差距弹窗 */}
+      <Modal
+        title="📊 差距分析"
+        open={gapModalOpen}
+        onOk={() => setGapModalOpen(false)}
+        onCancel={() => setGapModalOpen(false)}
+        okText="知道了，冲！"
+        cancelText="关闭"
+      >
+        {fifthItem && myItem && (
+          <div style={{ textAlign: 'center', padding: '16px 0' }}>
+            <div style={{ fontSize: 16, marginBottom: 16 }}>
+              你和第 5 名 <strong>{fifthItem.username}</strong> 的差距：
+            </div>
+            <div style={{ fontSize: 18, color: '#ff4d4f', fontWeight: 600, marginBottom: 8 }}>
+              💰 金额：还差 ¥{amountGap.toFixed(2)}
+            </div>
+            <div style={{ fontSize: 18, color: '#1890ff', fontWeight: 600, marginBottom: 16 }}>
+              📦 订单：还差 {orderGap} 单
+            </div>
+            <div style={{ fontSize: 14, color: '#666', background: '#f6ffed', padding: 12, borderRadius: 8 }}>
+              🚀 加油！每多一单，离榜更进一步！
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <style>{`
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+          50% { box-shadow: 0 4px 20px rgba(255, 193, 7, 0.3); }
+        }
+        .glow-card {
+          animation: glow 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   )
 }
@@ -152,13 +244,15 @@ export default function RankingsPage() {
   }, [activeTab])
 
   const items = [
-    { key: 'daily', label: '日榜', children: <RankingTable data={dailyData} loading={loading} /> },
-    { key: 'weekly', label: '周榜', children: <RankingTable data={weeklyData} loading={loading} /> },
+    { key: 'daily', label: '🚀 今日销管', children: <RankingsList data={dailyData} loading={loading} /> },
+    { key: 'weekly', label: '🔥 上周销管', children: <RankingsList data={weeklyData} loading={loading} /> },
   ]
 
   return (
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
-      <h2 style={{ margin: '0 0 16px 0' }}><TrophyOutlined style={{ color: '#faad14', marginRight: 8 }} />排行榜</h2>
+      <h2 style={{ margin: '0 0 16px 0', fontSize: 20 }}>
+        <TrophyOutlined style={{ color: '#faad14', marginRight: 8 }} />🏆 销管榜
+      </h2>
       <Tabs activeKey={activeTab} onChange={setActiveTab} items={items} />
     </div>
   )

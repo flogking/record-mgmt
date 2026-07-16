@@ -116,17 +116,17 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
         <Form.Item label="客户姓名" name="customer_name" rules={[{ required: true, message: '请输入客户姓名' }]}>
           <Input placeholder="请输入客户姓名" />
         </Form.Item>
-        {!isRenewal && (
-        <Form.Item label="联系电话" name="phone">
-          <Input placeholder="请输入联系电话" />
-        </Form.Item>
-        )}
         <Form.Item label="业务" name="business_type">
           <Select placeholder="请选择业务类型" allowClear>
             <Select.Option value="办卡">办卡</Select.Option>
             <Select.Option value="续费">续费</Select.Option>
           </Select>
         </Form.Item>
+        {!isRenewal && (
+        <Form.Item label="联系电话" name="phone">
+          <Input placeholder="请输入联系电话" />
+        </Form.Item>
+        )}
         <Form.Item label="产品号码" name="product" rules={[{ required: true, message: '请输入产品号码' }]}>
           <Input placeholder="请输入产品名称" />
         </Form.Item>

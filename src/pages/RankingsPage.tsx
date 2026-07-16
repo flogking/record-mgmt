@@ -4,7 +4,7 @@ import { TrophyOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { getUser } from '../services/authService'
-import { SUPABASE_URL, SUPABASE_ANON_KEY, authHeaders, authFetchWithTimeout } from '../utils/api'
+import { SUPABASE_URL, authHeaders, authFetchWithTimeout } from '../utils/api'
 
 const { Text } = Typography
 
@@ -18,69 +18,45 @@ interface RankingItem {
 }
 
 const rankColors = ['#fff8e1', '#f5f5f5', '#fff3e0']
-const rankBadgeColors = ['#ffd700', '#c0c0c0', '#cd7f32']
 
 function headers() { return authHeaders() }
 
 async function fetchRankings(startISO: string, endISO: string): Promise<RankingItem[]> {
-  const url = SUPABASE_URL
-    + '/rest/v1/records?select=user_id,amount,users(username,role)'
-    + '&users.role=eq.agent_2'
-    + '&created_at=gte.' + startISO
-    + '&created_at=lte.' + endISO
-
-  const res = await authFetchWithTimeout(url, { headers: headers() })
+  const res = await authFetchWithTimeout(SUPABASE_URL + '/rest/v1/rpc/get_rankings', {
+    method: 'POST',
+    headers: { ...headers(), 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+    body: JSON.stringify({ start_time: startISO, end_time: endISO }),
+  })
   if (!res.ok) return []
-
   const data = await res.json()
-
-  // Group by user_id
-  const map: Record<string, { username: string; totalAmount: number; orderCount: number }> = {}
-  for (const r of data) {
-    const uid = r.user_id
-    const uname = r.users?.username || '未知'
-    if (!map[uid]) {
-      map[uid] = { username: uname, totalAmount: 0, orderCount: 0 }
-    }
-    map[uid].totalAmount += r.amount || 0
-    map[uid].orderCount += 1
-  }
-
-  // Sort by totalAmount desc, then orderCount desc
-  const sorted = Object.entries(map)
-    .map(([user_id, v]) => ({ user_id, ...v }))
-    .sort((a, b) => b.totalAmount - a.totalAmount || b.orderCount - a.orderCount)
-    .slice(0, 5)
-
-  return sorted.map((item, idx) => ({
+  return data.map((item: any, idx: number) => ({
     key: item.user_id,
     rank: idx + 1,
     user_id: item.user_id,
     username: item.username,
-    totalAmount: item.totalAmount,
-    orderCount: item.orderCount,
+    totalAmount: parseFloat(item.total_amount) || 0,
+    orderCount: parseInt(item.order_count) || 0,
   }))
 }
 
 function getTodayRange() {
   return {
-    start: dayjs().startOf('day').toISOString(),
-    end: dayjs().endOf('day').toISOString(),
+    start: dayjs().startOf('day').format('YYYY-MM-DDTHH:mm:ssZ'),
+    end: dayjs().endOf('day').format('YYYY-MM-DDTHH:mm:ssZ'),
   }
 }
 
 function getLastWeekRange() {
   return {
-    start: dayjs().subtract(1, 'week').startOf('week').add(1, 'day').startOf('day').toISOString(),
-    end: dayjs().subtract(1, 'week').endOf('week').add(1, 'day').endOf('day').toISOString(),
+    start: dayjs().subtract(1, 'week').startOf('week').add(1, 'day').startOf('day').format('YYYY-MM-DDTHH:mm:ssZ'),
+    end: dayjs().subtract(1, 'week').endOf('week').add(1, 'day').endOf('day').format('YYYY-MM-DDTHH:mm:ssZ'),
   }
 }
 
 function RankingTable({ data, loading }: { data: RankingItem[]; loading: boolean }) {
   const currentUser = getUser()
-  const isAgent2 = currentUser?.role === 'agent_2'
-  const isInTop5 = isAgent2 && data.some(d => d.user_id === currentUser.id)
-  const isNotInTop5 = isAgent2 && !isInTop5 && data.length > 0
+  const isInTop5 = currentUser && data.some(d => d.user_id === currentUser.id)
+  const isNotInTop5 = currentUser?.role === 'agent_2' && !isInTop5 && data.length > 0
 
   const columns: ColumnsType<RankingItem> = [
     {
@@ -88,22 +64,22 @@ function RankingTable({ data, loading }: { data: RankingItem[]; loading: boolean
       dataIndex: 'rank',
       width: 70,
       render: (v: number) => v <= 3
-        ? <span style={{ fontWeight: 700, color: v === 1 ? '#d4a017' : v === 2 ? '#888' : '#a0522d' }}>{v}</span>
+        ? <span style={{ fontWeight: 700, color: v === 1 ? '#d4a017' : v === 2 ? '#888' : '#a0522d', fontSize: 16 }}>{v}</span>
         : v,
     },
     {
-      title: '代理用户名',
+      title: '用户名',
       dataIndex: 'username',
       render: (v: string, record: RankingItem) => {
         const isMe = currentUser && record.user_id === currentUser.id
-        return <>{v} {isMe && <Tag color="gold" style={{ marginLeft: 4 }}>我</Tag>}</>
+        return <>{v} {isMe && <Tag color='gold' style={{ marginLeft: 4 }}>我</Tag>}</>
       },
     },
     {
       title: '总金额',
       dataIndex: 'totalAmount',
       width: 120,
-      render: (v: number) => v.toFixed(2),
+      render: (v: number) => <span style={{ fontWeight: 600 }}>{v.toFixed(2)}</span>,
     },
     {
       title: '订单数',
@@ -116,12 +92,12 @@ function RankingTable({ data, loading }: { data: RankingItem[]; loading: boolean
     <div>
       <Spin spinning={loading}>
         {data.length === 0
-          ? <Empty description="暂无数据" style={{ marginTop: 60 }} />
+          ? <Empty description='暂无数据' style={{ marginTop: 60 }} />
           : <Table
               columns={columns}
               dataSource={data}
               pagination={false}
-              size="middle"
+              size='middle'
               rowClassName={(record) => {
                 const r = record.rank
                 if (r <= 3) return 'rank-row-' + r
@@ -132,18 +108,14 @@ function RankingTable({ data, loading }: { data: RankingItem[]; loading: boolean
         }
       </Spin>
       {data.length > 0 && (
-        <Text type="secondary" style={{ display: 'block', textAlign: 'center', marginTop: 8 }}>仅展示前 5 名</Text>
+        <Text type='secondary' style={{ display: 'block', textAlign: 'center', marginTop: 8 }}>仅展示前 5 名</Text>
       )}
       {isNotInTop5 && (
-        <Text type="warning" style={{ display: 'block', textAlign: 'center', marginTop: 4 }}>
+        <Text type='warning' style={{ display: 'block', textAlign: 'center', marginTop: 4 }}>
           您当前未进入前 5 名，再接再厉！
         </Text>
       )}
-      <style>{`
-        .rank-row-1 td { background: ${rankColors[0]} !important; }
-        .rank-row-2 td { background: ${rankColors[1]} !important; }
-        .rank-row-3 td { background: ${rankColors[2]} !important; }
-      `}</style>
+      <style>{`.rank-row-1 td { background: #fff8e1 !important; } .rank-row-2 td { background: #f5f5f5 !important; } .rank-row-3 td { background: #fff3e0 !important; }`}</style>
     </div>
   )
 }
@@ -180,26 +152,14 @@ export default function RankingsPage() {
   }, [activeTab])
 
   const items = [
-    {
-      key: 'daily',
-      label: '日榜',
-      children: <RankingTable data={dailyData} loading={loading} />,
-    },
-    {
-      key: 'weekly',
-      label: '周榜',
-      children: <RankingTable data={weeklyData} loading={loading} />,
-    },
+    { key: 'daily', label: '日榜', children: <RankingTable data={dailyData} loading={loading} /> },
+    { key: 'weekly', label: '周榜', children: <RankingTable data={weeklyData} loading={loading} /> },
   ]
 
   return (
     <div style={{ padding: '16px 24px', background: '#f5f5f5', minHeight: '100vh' }}>
-      <h2 style={{ margin: '0 0 16px 0' }}><TrophyOutlined style={{ color: '#faad14', marginRight: 8 }} />二级代理排行榜</h2>
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={items}
-      />
+      <h2 style={{ margin: '0 0 16px 0' }}><TrophyOutlined style={{ color: '#faad14', marginRight: 8 }} />排行榜</h2>
+      <Tabs activeKey={activeTab} onChange={setActiveTab} items={items} />
     </div>
   )
 }

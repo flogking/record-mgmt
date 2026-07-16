@@ -16,6 +16,8 @@ interface Props {
 export default function RecordFormModal({ open, onCancel, onSubmit, initialValues, submitting }: Props) {
   const [form] = Form.useForm()
   const [parseText, setParseText] = useState('')
+  const businessType = Form.useWatch('business_type', form)
+  const isRenewal = businessType === '续费'
 
   useEffect(() => {
     if (open) {
@@ -50,10 +52,10 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
         product: values.product,
         amount: values.amount,
         record_date: values.record_date.format('YYYY-MM-DD'),
-        shipping_address: values.shipping_address,
+        shipping_address: isRenewal ? null : (values.shipping_address || null),
         record_time: values.record_time ? values.record_time.format('HH:mm') : null,
-        tracking_number: values.tracking_number || null,
-        phone: values.phone || null,
+        tracking_number: isRenewal ? null : (values.tracking_number || null),
+        phone: isRenewal ? null : (values.phone || null),
         business_type: values.business_type || null,
         remark: values.remark || null,
       }
@@ -114,9 +116,11 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
         <Form.Item label="客户姓名" name="customer_name" rules={[{ required: true, message: '请输入客户姓名' }]}>
           <Input placeholder="请输入客户姓名" />
         </Form.Item>
+        {!isRenewal && (
         <Form.Item label="联系电话" name="phone">
           <Input placeholder="请输入联系电话" />
         </Form.Item>
+        )}
         <Form.Item label="业务" name="business_type">
           <Select placeholder="请选择业务类型" allowClear>
             <Select.Option value="办卡">办卡</Select.Option>
@@ -135,12 +139,16 @@ export default function RecordFormModal({ open, onCancel, onSubmit, initialValue
         <Form.Item label="时间" name="record_time">
           <TimePicker style={{ width: '100%' }} format="HH:mm" placeholder="请选择时间" />
         </Form.Item>
+        {!isRenewal && (
         <Form.Item label="快递地址" name="shipping_address">
           <Input.TextArea rows={3} placeholder="请输入快递地址" />
         </Form.Item>
+        )}
+        {!isRenewal && (
         <Form.Item label="快递单号" name="tracking_number">
           <Input placeholder="请输入快递单号（选填）" />
         </Form.Item>
+        )}
         <Form.Item label="备注" name="remark">
           <Input.TextArea rows={2} placeholder="请输入备注（选填）" />
         </Form.Item>

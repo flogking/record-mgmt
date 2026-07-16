@@ -79,15 +79,19 @@ export default function AppLayout({ children, onLogout, currentPage, onPageChang
   }
 
   const tabItems = userRole === 'client'
-    ? [{ key: 'client_orders', label: '收单中心' }]
+    ? [
+        { key: 'client_orders', label: '收单中心' },
+        { key: 'rankings', label: '排行榜' },
+      ]
     : [
+        { key: 'rankings', label: '排行榜' },
         { key: 'records', label: '记录管理' },
         { key: 'files', label: '资料中心' },
         ...(userRole === 'director' ? [
           { key: 'dashboard', label: '业绩看板' },
           { key: 'users', label: '用户管理' },
         ] : []),
-        ...(userRole === 'agent_1' || userRole === 'agent_2' ? [
+        ...(userRole === 'agent_1' ? [
           { key: 'team', label: '团队管理' },
           { key: 'staff', label: '下属管理' },
         ] : []),
